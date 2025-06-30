@@ -225,12 +225,18 @@ class ClaudeChat:
 async def handle_chat_stream(request):
     """Handle streaming chat requests with SSE"""
     try:
-        data = await request.json()
-        
-        # Extract required fields
-        message = data.get('message')
-        conversation_id = data.get('conversation_id', str(uuid.uuid4()))
-        system_prompt = data.get('system_prompt')
+        # Support both GET (for EventSource) and POST methods
+        if request.method == 'GET':
+            # EventSource sends parameters as query strings
+            message = request.query.get('message')
+            conversation_id = request.query.get('conversation_id', str(uuid.uuid4()))
+            system_prompt = request.query.get('system_prompt')
+        else:
+            # Traditional POST with JSON body
+            data = await request.json()
+            message = data.get('message')
+            conversation_id = data.get('conversation_id', str(uuid.uuid4()))
+            system_prompt = data.get('system_prompt')
         
         if not message:
             return web.json_response({
@@ -380,6 +386,7 @@ def create_app():
     # Add routes
     app.router.add_post('/chat', handle_chat)
     app.router.add_post('/chat/stream', handle_chat_stream)
+    app.router.add_get('/chat/stream', handle_chat_stream)  # Support GET for EventSource
     app.router.add_get('/conversation/{conversation_id}', handle_conversation_history)
     app.router.add_get('/health', handle_health)
     
