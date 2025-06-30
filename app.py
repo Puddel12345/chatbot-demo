@@ -20,7 +20,6 @@ from typing import Dict, List, Optional
 import aiohttp
 from aiohttp import web
 from aiohttp_sse import sse_response
-from aiohttp_cors import setup as cors_setup
 from dotenv import load_dotenv
 
 # Configuration
@@ -354,30 +353,35 @@ async def handle_health(request):
         }
     })
 
+@web.middleware
+async def cors_middleware(request, handler):
+    """Add CORS headers to all responses"""
+    
+    # Handle preflight requests
+    if request.method == 'OPTIONS':
+        response = web.Response()
+    else:
+        response = await handler(request)
+    
+    # Add CORS headers
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, Accept, Cache-Control'
+    response.headers['Access-Control-Expose-Headers'] = '*'
+    response.headers['Access-Control-Max-Age'] = '86400'
+    
+    return response
+
 def create_app():
     """Create and configure the web application"""
-    app = web.Application()
-    
-    # Setup CORS with correct syntax for aiohttp-cors
-    cors = cors_setup(app, defaults={
-        "*": {
-            "credentials": True,
-            "expose_headers": "*",
-            "allow_headers": "*"
-        }
-    })
+    # Create app with CORS middleware
+    app = web.Application(middlewares=[cors_middleware])
     
     # Add routes
-    chat_route = app.router.add_post('/chat', handle_chat)
-    stream_route = app.router.add_post('/chat/stream', handle_chat_stream)
-    conversation_route = app.router.add_get('/conversation/{conversation_id}', handle_conversation_history)
-    health_route = app.router.add_get('/health', handle_health)
-    
-    # Add CORS to all routes
-    cors.add(chat_route)
-    cors.add(stream_route)
-    cors.add(conversation_route)
-    cors.add(health_route)
+    app.router.add_post('/chat', handle_chat)
+    app.router.add_post('/chat/stream', handle_chat_stream)
+    app.router.add_get('/conversation/{conversation_id}', handle_conversation_history)
+    app.router.add_get('/health', handle_health)
     
     return app
 
