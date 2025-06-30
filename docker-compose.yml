@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  chat-webhook:
+    build: .
+    container_name: chat-webhook-server
+    ports:
+      - "8080:8080"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - PORT=8080
+    volumes:
+      # Persist conversation memory
+      - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
