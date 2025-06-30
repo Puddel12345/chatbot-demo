@@ -29,7 +29,7 @@ MODEL = "claude-opus-4-20250514"
 DATA_DIR = os.getenv('DATA_DIR', './data' if not os.path.exists('/.dockerenv') else '/app/data')
 MEMORY_FILE = os.path.join(DATA_DIR, "chat_memory.json")
 MAX_MEMORY_SIZE = 50  # Maximum number of conversations to store
-THINKING_BUDGET = 2048
+THINKING_BUDGET = 8192
 MAX_TOKENS = 8192
 TEMPERATURE = 1.0
 
