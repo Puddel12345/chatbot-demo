@@ -25,7 +25,8 @@ from dotenv import load_dotenv
 # Configuration
 MODEL = "claude-opus-4-20250514"
 # Use data directory for Docker volume persistence
-DATA_DIR = os.getenv('DATA_DIR', '/app/data')
+# For local development, use ./data instead of /app/data
+DATA_DIR = os.getenv('DATA_DIR', './data' if not os.path.exists('/.dockerenv') else '/app/data')
 MEMORY_FILE = os.path.join(DATA_DIR, "chat_memory.json")
 MAX_MEMORY_SIZE = 50  # Maximum number of conversations to store
 THINKING_BUDGET = 2048
