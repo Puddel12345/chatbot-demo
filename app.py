@@ -147,7 +147,7 @@ class ClaudeChat:
             "stream": True,
             "thinking": {
                 "type": "enabled",
-                "budget_tokens": THINKING_BUDGET
+                "budget_tokens": 8000,    
             }
         }
         
