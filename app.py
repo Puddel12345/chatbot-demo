@@ -225,6 +225,10 @@ class ClaudeChat:
 async def handle_chat_stream(request):
     """Handle streaming chat requests with SSE"""
     try:
+        # Handle OPTIONS request for CORS preflight
+        if request.method == 'OPTIONS':
+            return web.Response(status=200)
+            
         # Support both GET (for EventSource) and POST methods
         if request.method == 'GET':
             # EventSource sends parameters as query strings
@@ -387,6 +391,7 @@ def create_app():
     app.router.add_post('/chat', handle_chat)
     app.router.add_post('/chat/stream', handle_chat_stream)
     app.router.add_get('/chat/stream', handle_chat_stream)  # Support GET for EventSource
+    app.router.add_options('/chat/stream', handle_chat_stream)  # Handle CORS preflight
     app.router.add_get('/conversation/{conversation_id}', handle_conversation_history)
     app.router.add_get('/health', handle_health)
     
