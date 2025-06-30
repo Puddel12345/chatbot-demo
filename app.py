@@ -20,6 +20,7 @@ from typing import Dict, List, Optional
 import aiohttp
 from aiohttp import web
 from aiohttp_sse import sse_response
+from aiohttp_cors import setup as cors_setup
 from dotenv import load_dotenv
 
 # Configuration
@@ -357,11 +358,27 @@ def create_app():
     """Create and configure the web application"""
     app = web.Application()
     
+    # Setup CORS
+    cors = cors_setup(app, defaults={
+        "*": {
+            "allow_credentials": True,
+            "expose_headers": "*",
+            "allow_headers": "*",
+            "allow_methods": "*"
+        }
+    })
+    
     # Add routes
-    app.router.add_post('/chat', handle_chat)
-    app.router.add_post('/chat/stream', handle_chat_stream)
-    app.router.add_get('/conversation/{conversation_id}', handle_conversation_history)
-    app.router.add_get('/health', handle_health)
+    chat_route = app.router.add_post('/chat', handle_chat)
+    stream_route = app.router.add_post('/chat/stream', handle_chat_stream)
+    conversation_route = app.router.add_get('/conversation/{conversation_id}', handle_conversation_history)
+    health_route = app.router.add_get('/health', handle_health)
+    
+    # Add CORS to all routes
+    cors.add(chat_route)
+    cors.add(stream_route)
+    cors.add(conversation_route)
+    cors.add(health_route)
     
     return app
 
