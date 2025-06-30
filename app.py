@@ -358,13 +358,12 @@ def create_app():
     """Create and configure the web application"""
     app = web.Application()
     
-    # Setup CORS
+    # Setup CORS with correct syntax for aiohttp-cors
     cors = cors_setup(app, defaults={
         "*": {
-            "allow_credentials": True,
+            "credentials": True,
             "expose_headers": "*",
-            "allow_headers": "*",
-            "allow_methods": "*"
+            "allow_headers": "*"
         }
     })
     
