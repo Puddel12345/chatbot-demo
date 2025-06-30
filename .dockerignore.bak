@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+.env
+.git
+*.md
+test_*.py
+venv
+.vscode
+data
+chat_memory.json
