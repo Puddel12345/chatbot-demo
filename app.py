@@ -76,6 +76,10 @@ class ConversationMemory:
     
     def add_message(self, conversation_id: str, role: str, content: str, thinking: Optional[str] = None):
         """Add a message to conversation history"""
+        # Skip empty messages
+        if not content or not content.strip():
+            return
+            
         if conversation_id not in self.conversations:
             self.conversations[conversation_id] = []
         
@@ -102,7 +106,7 @@ class ConversationMemory:
         
         for msg in conversation:
             # Only include user and assistant messages (not thinking)
-            if msg['role'] in ['user', 'assistant']:
+            if msg['role'] in ['user', 'assistant'] and msg.get('content', '').strip():
                 messages.append({
                     "role": msg['role'],
                     "content": msg['content']
